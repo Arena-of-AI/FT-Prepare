@@ -7,16 +7,25 @@ def run_command(command):
     output, error = process.communicate()
     return output.decode(), error.decode()
 
-def main():
+def create_temp_folder():
     # 创建 "temp" 文件夹
-    if not os.path.exists("temp"):
-        os.makedirs("temp")
+    temp_folder = os.path.join(os.getcwd(), "temp")
+    if not os.path.exists(temp_folder):
+        os.makedirs(temp_folder)
+    return temp_folder
 
+def create_downloads_folder():
     # 创建 "downloads" 文件夹
-    if not os.path.exists("downloads"):
-        os.makedirs("downloads")
+    downloads_folder = os.path.join(os.getcwd(), "downloads")
+    if not os.path.exists(downloads_folder):
+        os.makedirs(downloads_folder)
+    return downloads_folder
 
+def main():
     st.title("Data Preparation Tool")
+
+    temp_folder = create_temp_folder()
+    downloads_folder = create_downloads_folder()
 
     # 上传 Excel 文件
     uploaded_file = st.file_uploader("Upload Excel file", type=["xlsx"])
@@ -28,7 +37,7 @@ def main():
     if st.button("Prepare Data"):
         if uploaded_file is not None:
             # 保存上传的 Excel 文件
-            file_path = f"temp/{uploaded_file.name}"
+            file_path = os.path.join(temp_folder, uploaded_file.name)
             with open(file_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
@@ -37,12 +46,17 @@ def main():
             output, error = run_command(command)
 
             # 将输出写入临时文件
-            output_file = "temp/prepared_data.jsonl"
+            output_file = os.path.join(temp_folder, "prepared_data.jsonl")
             with open(output_file, "w") as f:
                 f.write(output)
 
+            # 移动生成的 JSONL 文件到 "downloads" 文件夹
+            output_file_destination = os.path.join(downloads_folder, "prepared_data.jsonl")
+            os.rename(output_file, output_file_destination)
+
             # 下载生成的 JSONL 文件
-            st.markdown(f"### [Download Prepared Data JSONL](downloads/{output_file})")
+            download_link = f"[Download Prepared Data JSONL](downloads/prepared_data.jsonl)"
+            st.markdown(download_link, unsafe_allow_html=True)
         else:
             st.warning("Please upload an Excel file")
 
