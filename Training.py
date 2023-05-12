@@ -21,6 +21,11 @@ def create_downloads_folder():
         os.makedirs(downloads_folder)
     return downloads_folder
 
+def download_file(file_path):
+    with open(file_path, "rb") as file:
+        file_data = file.read()
+    st.download_button("Download Prepared Data JSONL", file_data, file_name="prepared_data.jsonl")
+
 def main():
     st.title("Data Preparation Tool")
 
@@ -55,8 +60,7 @@ def main():
             os.rename(output_file, output_file_destination)
 
             # 下载生成的 JSONL 文件
-            download_link = f"[Download Prepared Data JSONL](downloads/prepared_data.jsonl)"
-            st.markdown(download_link, unsafe_allow_html=True)
+            download_file(output_file_destination)
         else:
             st.warning("Please upload an Excel file")
 
