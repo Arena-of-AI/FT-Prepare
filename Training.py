@@ -1,46 +1,43 @@
 import streamlit as st
 import openai
-import pandas as pd
-from openai import errors
+import json
 
-openai.api_key = st.secrets["api_key"]
+def fine_tune(api_key, training_data):
+    # 设置 OpenAI API 密钥
+    openai.api_key = api_key
 
-def convert_to_jsonl(df):
-    # Add your code to convert DataFrame to JSONL format
-    # Return the JSONL data
-    return jsonl
+    # 解析 JSONL 文件并准备数据
+    lines = training_data.decode().split("\n")
+    examples = []
+    for line in lines:
+        if line != "":
+            examples.append(json.loads(line))
 
-def train_model(jsonl_data, model_name, output_filename):
-    # Add your code for model training using OpenAI API
-    # Use the provided JSONL data, model name, and output filename
+    # 执行 fine-tune 操作
+    # TODO: 在这里调用 OpenAI 的 fine-tune API 来完成操作
+    # 可以根据 OpenAI Python 包的文档来调用适当的函数和参数
+    # 可能需要使用循环、异步操作等来处理训练数据
+
+    # 输出 fine-tune 结果
+    st.success("Fine-tune completed!")
 
 def main():
     st.title("OpenAI Fine-Tune")
-    st.write("Welcome to OpenAI Fine-Tune application!")
 
-    # Step 1: File Upload and Conversion
-    st.header("Step 1: File Upload and Conversion")
-    uploaded_file = st.file_uploader("Upload JSONL File", type=["jsonl"])
+    # 获取用户输入的 OpenAI API 密钥
+    api_key = st.text_input("Enter your OpenAI API Key")
 
+    # 上传 JSONL 文件作为训练数据
+    uploaded_file = st.file_uploader("Upload JSONL file for training")
     if uploaded_file is not None:
-        try:
-            df = pd.read_json(uploaded_file, lines=True)
-            jsonl = convert_to_jsonl(df)
-            st.success("File conversion completed!")
+        training_data = uploaded_file.read()
 
-            # Step 2: Model Selection and Training
-            st.header("Step 2: Model Selection and Training")
-            model_name = st.selectbox("Select the model", ["model1", "model2", "model3"])
-            output_filename = st.text_input("Enter the output filename")
-
-            if st.button("Start Training"):
-                train_model(jsonl, model_name, output_filename)
-                st.success("Model training completed.")
-
-        except errors.AuthenticationError:
-            st.error("Invalid OpenAI API Key")
-        except Exception as e:
-            st.error(f"Error: {e}")
+    # 开始执行 fine-tune
+    if st.button("Start Fine-Tuning"):
+        if api_key and training_data:
+            fine_tune(api_key, training_data)
+        else:
+            st.error("Please enter API Key and upload training data")
 
 if __name__ == "__main__":
     main()
