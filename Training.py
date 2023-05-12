@@ -4,7 +4,7 @@ import subprocess
 
 def run_command(command):
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
-    with st.beta_expander("Terminal Output"):
+    with st.expander("Terminal Output"):
         for line in process.stdout:
             st.text(line.strip())
     _, error = process.communicate()
