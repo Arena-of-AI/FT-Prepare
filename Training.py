@@ -1,43 +1,41 @@
 import streamlit as st
-import openai
-import json
+import subprocess
 
-def fine_tune(api_key, training_data):
-    # 设置 OpenAI API 密钥
-    openai.api_key = api_key
-
-    # 解析 JSONL 文件并准备数据
-    lines = training_data.decode().split("\n")
-    examples = []
-    for line in lines:
-        if line != "":
-            examples.append(json.loads(line))
-
-    # 执行 fine-tune 操作
-    # TODO: 在这里调用 OpenAI 的 fine-tune API 来完成操作
-    # 可以根据 OpenAI Python 包的文档来调用适当的函数和参数
-    # 可能需要使用循环、异步操作等来处理训练数据
-
-    # 输出 fine-tune 结果
-    st.success("Fine-tune completed!")
+def run_command(command):
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    output, error = process.communicate()
+    return output.decode(), error.decode()
 
 def main():
-    st.title("OpenAI Fine-Tune")
+    st.title("Data Preparation Tool")
 
-    # 获取用户输入的 OpenAI API 密钥
-    api_key = st.text_input("Enter your OpenAI API Key")
-
-    # 上传 JSONL 文件作为训练数据
-    uploaded_file = st.file_uploader("Upload JSONL file for training")
+    # 上传 Excel 文件
+    uploaded_file = st.file_uploader("Upload Excel file", type=["xlsx"])
     if uploaded_file is not None:
-        training_data = uploaded_file.read()
+        # 显示上传的文件名
+        st.write("Uploaded file:", uploaded_file.name)
 
-    # 开始执行 fine-tune
-    if st.button("Start Fine-Tuning"):
-        if api_key and training_data:
-            fine_tune(api_key, training_data)
+    # 准备数据并生成 JSONL 文件
+    if st.button("Prepare Data"):
+        if uploaded_file is not None:
+            # 保存上传的 Excel 文件
+            file_path = f"temp/{uploaded_file.name}"
+            with open(file_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
+
+            # 运行 CLI 命令
+            command = f"openai tools fine_tunes.prepare_data -f {file_path}"
+            output, error = run_command(command)
+
+            # 将输出写入临时文件
+            output_file = "temp/prepared_data.jsonl"
+            with open(output_file, "w") as f:
+                f.write(output)
+
+            # 下载生成的 JSONL 文件
+            st.markdown(f"### [Download Prepared Data JSONL](/{output_file})")
         else:
-            st.error("Please enter API Key and upload training data")
+            st.warning("Please upload an Excel file")
 
 if __name__ == "__main__":
     main()
