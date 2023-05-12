@@ -50,17 +50,24 @@ def main():
             command = f"openai tools fine_tunes.prepare_data -f {file_path}"
             output, error = run_command(command)
 
-            # 将输出写入临时文件
-            output_file = os.path.join(temp_folder, "prepared_data.jsonl")
-            with open(output_file, "w") as f:
-                f.write(output)
+            # 解析 CLI 输出并获取生成的 JSONL 文件名
+            output_lines = output.split("\n")
+            jsonl_filename = ""
+            for line in output_lines:
+                if line.startswith("Wrote modified files to"):
+                    jsonl_filename = line.split("`")[1]
+                    break
 
-            # 移动生成的 JSONL 文件到 "downloads" 文件夹
-            output_file_destination = os.path.join(downloads_folder, "prepared_data.jsonl")
-            os.rename(output_file, output_file_destination)
+            if jsonl_filename:
+                # 将生成的 JSONL 文件移动到 "downloads" 文件夹
+                output_file = os.path.join(os.getcwd(), jsonl_filename)
+                output_file_destination = os.path.join(downloads_folder, "prepared_data.jsonl")
+                os.rename(output_file, output_file_destination)
 
-            # 下载生成的 JSONL 文件
-            download_file(output_file_destination)
+                # 下载生成的 JSONL 文件
+                download_file(output_file_destination)
+            else:
+                st.warning("Failed to generate JSONL file")
         else:
             st.warning("Please upload an Excel file")
 
