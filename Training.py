@@ -1,6 +1,12 @@
 import streamlit as st
 import subprocess
+import os
 
+# 创建 "temp" 文件夹
+if not os.path.exists("temp"):
+    os.makedirs("temp")
+
+    
 def run_command(command):
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = process.communicate()
