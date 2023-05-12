@@ -32,6 +32,11 @@ def download_file(file_path):
 def main():
     st.title("Data Preparation Tool")
 
+    # 输入 OpenAI API 密钥
+    api_key = st.text_input("Enter OpenAI API Key")
+    if not api_key:
+        st.warning("Please enter your OpenAI API Key")
+
     temp_folder = create_temp_folder()
     downloads_folder = create_downloads_folder()
 
@@ -43,14 +48,14 @@ def main():
 
     # 准备数据并生成 JSONL 文件
     if st.button("Prepare Data"):
-        if uploaded_file is not None:
+        if uploaded_file is not None and api_key:
             # 保存上传的 Excel 文件
             file_path = os.path.join(temp_folder, uploaded_file.name)
             with open(file_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
             # 运行 CLI 命令
-            command = f"openai tools fine_tunes.prepare_data -f {file_path}"
+            command = f"OPENAI_API_KEY={api_key} openai tools fine_tunes.prepare_data -f {file_path}"
             error = run_command(command)
 
             if not error:
@@ -71,7 +76,7 @@ def main():
                 st.warning("An error occurred during data preparation")
                 st.error(error)
         else:
-            st.warning("Please upload an Excel file")
+            st.warning("Please upload an Excel file and enter your OpenAI API Key")
 
 if __name__ == "__main__":
     main()
