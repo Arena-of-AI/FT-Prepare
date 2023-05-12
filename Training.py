@@ -1,18 +1,21 @@
+import os
 import streamlit as st
 import subprocess
-import os
 
-# 创建 "temp" 文件夹
-if not os.path.exists("temp"):
-    os.makedirs("temp")
-
-    
 def run_command(command):
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output, error = process.communicate()
     return output.decode(), error.decode()
 
 def main():
+    # 创建 "temp" 文件夹
+    if not os.path.exists("temp"):
+        os.makedirs("temp")
+
+    # 创建 "downloads" 文件夹
+    if not os.path.exists("downloads"):
+        os.makedirs("downloads")
+
     st.title("Data Preparation Tool")
 
     # 上传 Excel 文件
@@ -39,7 +42,7 @@ def main():
                 f.write(output)
 
             # 下载生成的 JSONL 文件
-            st.markdown(f"### [Download Prepared Data JSONL](/{output_file})")
+            st.markdown(f"### [Download Prepared Data JSONL](downloads/{output_file})")
         else:
             st.warning("Please upload an Excel file")
 
