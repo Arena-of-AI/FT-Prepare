@@ -79,4 +79,4 @@ def main():
             if not error:
                 # 解析 CLI 输出并获取生成的 JSONL 文件名
                 jsonl_filename = ""
-                with os.scandir(downloads_folder
+                with os.scandir(downloads_folder)
