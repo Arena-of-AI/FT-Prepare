@@ -1,41 +1,5 @@
-import os
-import streamlit as st
-import subprocess
-
-def run_command(command):
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
-    with st.expander("Terminal Output"):
-        for line in process.stdout:
-            st.text(line.strip())
-    _, error = process.communicate()
-    return error
-
-def create_temp_folder():
-    # 创建 "temp" 文件夹
-    temp_folder = os.path.join(os.getcwd(), "temp")
-    if not os.path.exists(temp_folder):
-        os.makedirs(temp_folder)
-    return temp_folder
-
-def create_downloads_folder():
-    # 创建 "downloads" 文件夹
-    downloads_folder = os.path.join(os.getcwd(), "downloads")
-    if not os.path.exists(downloads_folder):
-        os.makedirs(downloads_folder)
-    return downloads_folder
-
-def download_file(file_path):
-    with open(file_path, "rb") as file:
-        file_data = file.read()
-    st.download_button("Download Prepared Data JSONL", file_data, file_name="prepared_data.jsonl")
-
 def main():
     st.title("Data Preparation Tool")
-
-    # 输入 OpenAI API 密钥
-    api_key = st.text_input("Enter OpenAI API Key")
-    if not api_key:
-        st.warning("Please enter your OpenAI API Key")
 
     temp_folder = create_temp_folder()
     downloads_folder = create_downloads_folder()
@@ -77,6 +41,20 @@ def main():
             _, error = process.communicate()
 
             if not error:
-                # 解析 CLI 输出并获取生成的 JSONL 文件名
-                jsonl_filename = ""
-                with os.scandir(downloads_folder)
+                # 查找生成的 JSONL 文件
+                jsonl_filename = None
+                for filename in os.listdir(downloads_folder):
+                    if filename.endswith(".jsonl"):
+                        jsonl_filename = filename
+                        break
+
+                if jsonl_filename:
+                    # 下载生成的 JSONL 文件
+                    download_file(os.path.join(downloads_folder, jsonl_filename))
+                else:
+                    st.warning("Failed to find JSONL file")
+            else:
+                st.warning("An error occurred during data preparation")
+                st.error(error)
+        else:
+            st.warning("Please upload an Excel file and enter your OpenAI API Key")
