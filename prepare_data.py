@@ -68,6 +68,10 @@ def main():
                     # 下载生成的 JSONL 文件
                     download_link = f"<a href='./downloads/{jsonl_filename}' download>Download Prepared Data JSONL</a>"
                     st.markdown(download_link, unsafe_allow_html=True)
+
+                    # 显示命令行输出
+                    st.markdown("### Command Line Output:")
+                    st.code(output)
                 else:
                     st.warning("Failed to find JSONL file")
             else:
