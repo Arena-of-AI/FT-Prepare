@@ -4,11 +4,14 @@ import subprocess
 
 def run_command(command):
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
+    output_lines = []
     with st.expander("Terminal Output"):
         for line in process.stdout:
+            output_lines.append(line.strip())
             st.text(line.strip())
+
     _, error = process.communicate()
-    return error
+    return output_lines, error
 
 def create_temp_folder():
     # 创建 "temp" 文件夹
@@ -49,12 +52,19 @@ def main():
 
             # 运行 CLI 命令
             command = f"OPENAI_API_KEY={api_key} openai tools fine_tunes.prepare_data -f {file_path}"
-            output, error = run_command(command)
+            output_lines, error = run_command(command)
+
+            # 在终端输出中寻找需要用户回答的问题
+            question_indices = [i for i, line in enumerate(output_lines) if line.endswith("[Y/n]:")]
+            for index in question_indices:
+                question = output_lines[index]
+                default_answer = "Y" if question.endswith("[Y/n]:") else ""
+                answer = st.text_input(question, default_answer)
 
             if not error:
                 # 解析 CLI 输出并获取生成的 JSONL 文件名
                 jsonl_filename = None
-                for line in output.splitlines():
+                for line in output_lines:
                     if line.startswith("Wrote modified files to"):
                         jsonl_filename = line.split()[-1]
                         break
