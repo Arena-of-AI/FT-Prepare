@@ -4,14 +4,11 @@ import subprocess
 
 def run_command(command):
     process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
-    output_lines = []
     with st.expander("Terminal Output"):
         for line in process.stdout:
-            output_lines.append(line.strip())
             st.text(line.strip())
-
     _, error = process.communicate()
-    return output_lines, error
+    return error
 
 def create_temp_folder():
     # 创建 "temp" 文件夹
@@ -52,22 +49,25 @@ def main():
 
             # 运行 CLI 命令
             command = f"OPENAI_API_KEY={api_key} openai tools fine_tunes.prepare_data -f {file_path}"
-            output_lines, error = run_command(command)
+            process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
 
-            # 在终端输出中寻找需要用户回答的问题
-            question_indices = [i for i, line in enumerate(output_lines) if line.endswith("[Y/n]:")]
-            for index in question_indices:
-                question = output_lines[index]
-                default_answer = "Y" if question.endswith("[Y/n]:") else ""
-                st.write(question)
-                answer = st.radio("", ("Yes", "No"), key=str(index), index=0)
+            # 自动回答所有问题
+            with st.expander("Terminal Output"):
+                while process.poll() is None:
+                    line = process.stdout.readline().strip()
+                    st.text(line)
+                    if line.endswith("[Y/n]:"):
+                        process.stdin.write("Y\n")
+                        process.stdin.flush()
+
+            _, error = process.communicate()
 
             if not error:
-                # 解析 CLI 输出并获取生成的 JSONL 文件名
+                # 查找生成的 JSONL 文件
                 jsonl_filename = None
-                for line in output_lines:
-                    if line.startswith("Wrote modified files to"):
-                        jsonl_filename = line.split()[-1]
+                for filename in os.listdir(downloads_folder):
+                    if filename.endswith(".jsonl"):
+                        jsonl_filename = filename
                         break
 
                 if jsonl_filename:
