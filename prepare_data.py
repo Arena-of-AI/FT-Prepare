@@ -49,19 +49,22 @@ def main():
 
             # 运行 CLI 命令
             command = f"OPENAI_API_KEY={api_key} openai tools fine_tunes.prepare_data -f {file_path}"
-            
-            # 自动回答所有问题
-            input_answers = "y\n" * 5  # 回答5个问题都是 "y"
-            command_with_answers = f"echo '{input_answers}' | {command}"
-            
-            error = run_command(command_with_answers)
+            error = run_command(command)
 
             if not error:
                 # 查找生成的 JSONL 文件
-                jsonl_filename = os.path.splitext(uploaded_file.name)[0] + "_prepared.jsonl"
-                output_file_path = os.path.join(downloads_folder, jsonl_filename)
+                jsonl_filename = None
+                for filename in os.listdir(temp_folder):
+                    if filename.endswith(".jsonl"):
+                        jsonl_filename = filename
+                        break
 
-                if os.path.exists(output_file_path):
+                if jsonl_filename:
+                    # 移动 JSONL 文件到下载文件夹
+                    output_file = os.path.join(temp_folder, jsonl_filename)
+                    download_file = os.path.join(downloads_folder, jsonl_filename)
+                    os.rename(output_file, download_file)
+
                     # 下载生成的 JSONL 文件
                     download_link = f"./downloads/{jsonl_filename}"
                     st.markdown(f"### [Download Prepared Data JSONL]({download_link})")
