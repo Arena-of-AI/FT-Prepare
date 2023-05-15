@@ -58,13 +58,10 @@ def main():
 
             if not error:
                 # 查找生成的 JSONL 文件
-                jsonl_filename = None
-                for filename in os.listdir(downloads_folder):
-                    if filename.endswith(".jsonl"):
-                        jsonl_filename = filename
-                        break
+                jsonl_filename = os.path.splitext(uploaded_file.name)[0] + "_prepared.jsonl"
+                output_file_path = os.path.join(downloads_folder, jsonl_filename)
 
-                if jsonl_filename:
+                if os.path.exists(output_file_path):
                     # 下载生成的 JSONL 文件
                     download_link = f"./downloads/{jsonl_filename}"
                     st.markdown(f"### [Download Prepared Data JSONL]({download_link})")
