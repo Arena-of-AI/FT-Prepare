@@ -3,9 +3,12 @@ import streamlit as st
 import subprocess
 
 def run_command(command):
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    output, error = process.communicate()
-    return output.decode(), error.decode()
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
+    with st.expander("Terminal Output"):
+        for line in process.stdout:
+            st.text(line.strip())
+    _, error = process.communicate()
+    return error
 
 def create_temp_folder():
     # 创建 "temp" 文件夹
@@ -50,10 +53,9 @@ def main():
 
             if not error:
                 # 解析 CLI 输出并获取生成的 JSONL 文件名
-                jsonl_filename = ""
-                lines = output.splitlines()
-                for line in lines:
-                    if line.startswith("Wrote modified files to "):
+                jsonl_filename = None
+                for line in output.splitlines():
+                    if line.startswith("Wrote modified files to"):
                         jsonl_filename = line.split()[-1]
                         break
 
