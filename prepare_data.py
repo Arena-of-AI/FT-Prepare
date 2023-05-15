@@ -2,13 +2,10 @@ import os
 import streamlit as st
 import subprocess
 
-def run_command(command):
-    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, bufsize=1, universal_newlines=True)
-    with st.expander("Terminal Output"):
-        for line in process.stdout:
-            st.text(line.strip())
-    _, error = process.communicate()
-    return error
+def run_command(command, input_text=""):
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True)
+    output, error = process.communicate(input=input_text)
+    return output, error
 
 def create_temp_folder():
     # 创建 "temp" 文件夹
@@ -49,7 +46,10 @@ def main():
 
             # 运行 CLI 命令
             command = f"OPENAI_API_KEY={api_key} openai tools fine_tunes.prepare_data -f {file_path}"
-            error = run_command(command)
+
+            # 自动回答所有问题
+            input_text = "y\n" * 5  # 回答5个问题都是 "y"
+            output, error = run_command(command, input_text)
 
             if not error:
                 # 查找生成的 JSONL 文件
