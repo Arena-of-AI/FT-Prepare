@@ -59,7 +59,8 @@ def main():
             for index in question_indices:
                 question = output_lines[index]
                 default_answer = "Y" if question.endswith("[Y/n]:") else ""
-                answer = st.text_input(question, default_answer)
+                st.write(question)
+                answer = st.radio("", ("Yes", "No"), key=str(index), index=0)
 
             if not error:
                 # 解析 CLI 输出并获取生成的 JSONL 文件名
