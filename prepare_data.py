@@ -66,8 +66,8 @@ def main():
                     os.rename(output_file, download_file)
 
                     # 下载生成的 JSONL 文件
-                    download_link = f"./downloads/{jsonl_filename}"
-                    st.markdown(f"### [Download Prepared Data JSONL]({download_link})")
+                    download_link = f"<a href='./downloads/{jsonl_filename}' download>Download Prepared Data JSONL</a>"
+                    st.markdown(download_link, unsafe_allow_html=True)
                 else:
                     st.warning("Failed to find JSONL file")
             else:
