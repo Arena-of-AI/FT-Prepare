@@ -66,7 +66,7 @@ def main():
                     os.rename(output_file, download_file)
 
                     # 下载生成的 JSONL 文件
-                    download_link = f"<a href='./downloads/{jsonl_filename}' download>Download Prepared Data JSONL</a>"
+                    download_link = f"<a href='/downloads/{jsonl_filename}' download>Download Prepared Data JSONL</a>"
                     st.markdown(download_link, unsafe_allow_html=True)
 
                     # 显示命令行输出
