@@ -65,8 +65,12 @@ def main():
                     download_file = os.path.join(downloads_folder, jsonl_filename)
                     os.rename(output_file, download_file)
 
+                    # 读取 JSONL 文件内容
+                    with open(download_file, "r") as f:
+                        jsonl_data = f.read()
+
                     # 下载生成的 JSONL 文件
-                    download_link = f"<a href='/downloads/{jsonl_filename}' download>Download Prepared Data JSONL</a>"
+                    download_link = f"<a href='data:text/json;charset=utf-8,{jsonl_data}' download='{jsonl_filename}'>Download Prepared Data JSONL</a>"
                     st.markdown(download_link, unsafe_allow_html=True)
 
                     # 显示命令行输出
